@@ -1,4 +1,4 @@
-import { File, Storage } from '@google-cloud/storage'
+import { File, Storage } from '@omnivore/utils'
 import { Highlight, Omnivore } from '@omnivore-app/api'
 import { RedisDataSource } from '@omnivore/utils'
 import * as Sentry from '@sentry/serverless'
@@ -113,27 +113,6 @@ export const exporter = Sentry.GCPFunction.wrapHttpFunction(
 
       const file = createGCSFile(GCS_BUCKET, fullPath)
 
-      // Create a PassThrough stream
-      const passthroughStream = new PassThrough()
-
-      // Pipe the PassThrough stream to the GCS file write stream
-      const writeStream = file.createWriteStream({
-        metadata: {
-          contentType: 'application/zip',
-        },
-      })
-
-      passthroughStream.pipe(writeStream)
-
-      // Handle any errors in the streams
-      writeStream.on('error', (err) => {
-        console.error('Error writing to GCS:', err)
-      })
-
-      writeStream.on('finish', () => {
-        console.log('File successfully written to GCS')
-      })
-
       // Initialize archiver for zipping files
       const archive = archiver('zip', {
         zlib: { level: 9 }, // Compression level
@@ -143,9 +122,6 @@ export const exporter = Sentry.GCPFunction.wrapHttpFunction(
       archive.on('error', (err) => {
         throw err
       })
-
-      // Pipe the archiver output to the PassThrough stream
-      archive.pipe(passthroughStream)
 
       // fetch data from the database
       const omnivore = new Omnivore({
@@ -221,10 +197,8 @@ export const exporter = Sentry.GCPFunction.wrapHttpFunction(
       // Finalize the archive
       await archive.finalize()
 
-      // Wait until the zip file is completely written
-      await new Promise((resolve, reject) => {
-        writeStream.on('finish', resolve)
-        writeStream.on('error', reject)
+      await file.save(archive, {
+        contentType: 'application/zip'
       })
 
       // generate a temporary signed url for the csv file

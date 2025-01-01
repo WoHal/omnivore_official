@@ -1,4 +1,4 @@
-import { Storage } from '@google-cloud/storage'
+import { Storage } from '@omnivore/utils'
 import { Readability } from '@omnivore/readability'
 import { RedisDataSource } from '@omnivore/utils'
 import * as Sentry from '@sentry/serverless'
@@ -307,7 +307,7 @@ const handleEvent = async (
       return
     }
 
-    const stream = storage
+    const stream = await storage
       .bucket(data.bucket)
       .file(data.name)
       .createReadStream()

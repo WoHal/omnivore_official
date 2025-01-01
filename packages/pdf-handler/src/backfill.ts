@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { Storage } from '@google-cloud/storage'
+import { Storage } from '@omnivore/utils'
 import { parsePdf } from './pdf'
 import axios from 'axios'
 
@@ -38,6 +38,8 @@ const postUpdate = async (
 }
 
 const listFiles = async () => {
+  // TODO: What does it do?
+  /*
   const res = await storage
     .bucket('omnivore')
     .getFiles({ prefix: 'u/', maxResults: 50 })
@@ -46,15 +48,14 @@ const listFiles = async () => {
   const [files] = res
   console.log('Files:')
   for (const file of files) {
-    const url = file.publicUrl()
-    const [isPublic] = await file.isPublic()
-    console.log(file.publicUrl(), 'is public:', isPublic)
+    const [isPublic] = await file.userMetadata?
     if (isPublic) {
+      const url = await file.publicUrl()
       const parsed = await parsePdf(new URL(url))
       // console.log(text)
       // console.log('\n\n')
       await postUpdate(
-        file.name,
+        file.name!,
         parsed.content,
         parsed.title,
         parsed.author,
@@ -62,6 +63,7 @@ const listFiles = async () => {
       )
     }
   }
+    */
 }
 
 listFiles().catch(console.error)

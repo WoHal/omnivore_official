@@ -1,4 +1,4 @@
-import { File, Storage } from '@google-cloud/storage'
+import { File, Storage } from '@omnivore/utils'
 import * as Sentry from '@sentry/serverless'
 import { stringify } from 'csv-stringify'
 import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
@@ -212,7 +212,6 @@ export const importer = Sentry.GCPFunction.wrapHttpFunction(
 
     const systemToken = await createSystemToken(claims, JWT_SECRET)
 
-    let writeStream: NodeJS.WritableStream | undefined
     try {
       const userId = claims.uid
       const integrationClient = getIntegrationClient(req.body.integrationName)
@@ -252,15 +251,14 @@ export const importer = Sentry.GCPFunction.wrapHttpFunction(
         const fullPath = `imports/${userId}/${dateStr}/${integrationClient.name}-${fileUuid}.csv`
         // open a write_stream to the file
         const file = createGCSFile(GCS_BUCKET, fullPath)
-        writeStream = file.createWriteStream({
-          contentType: 'text/csv',
-        })
         // stringify the data and pipe it to the write_stream
         const stringifier = stringify({
           header: true,
           columns: ['url', 'state', 'labels'],
         })
-        stringifier.pipe(writeStream)
+        await file.save(stringifier, {
+          contentType: 'text/csv'
+        })
 
         // paginate api calls to the integration
         do {
@@ -333,7 +331,6 @@ export const importer = Sentry.GCPFunction.wrapHttpFunction(
       return res.status(500).send(err)
     } finally {
       console.log('closing write stream')
-      writeStream?.end()
     }
 
     res.sendStatus(200)

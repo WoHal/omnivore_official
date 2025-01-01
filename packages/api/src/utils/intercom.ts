@@ -1,8 +1,9 @@
 import { Client } from 'intercom-client'
 import { env } from '../env'
 
+// disable Intercom
 export const IntercomClient =
-  env.server.apiEnv && !env.dev.isLocal
+  false && env.server.apiEnv && !env.dev.isLocal
     ? new Client({
         tokenAuth: { token: env.intercom.token },
       })

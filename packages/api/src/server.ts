@@ -173,7 +173,8 @@ const main = async (): Promise<void> => {
   await apollo.start()
   apollo.applyMiddleware({ app, path: '/api/graphql', cors: corsConfig })
 
-  if (!env.dev.isLocal) {
+  // TODO: find alternatives
+  if (false && !env.dev.isLocal) {
     const mwLogger = loggers.get('express', { levels: config.syslog.levels })
     const transport = buildLoggerTransport('express')
     const mw = await lw.express.makeMiddleware(mwLogger, transport)

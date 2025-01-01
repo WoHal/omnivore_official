@@ -1,5 +1,4 @@
-import { GetSignedUrlConfig, Storage } from '@google-cloud/storage'
-import { RedisDataSource } from '@omnivore/utils'
+import { RedisDataSource, Storage } from '@omnivore/utils'
 import * as Sentry from '@sentry/serverless'
 import 'dotenv/config'
 import { queueUpdatePageJob, State } from './job'
@@ -33,7 +32,7 @@ const shouldHandle = (data: StorageEventData) => {
 const getDocumentUrl = async (
   data: StorageEventData
 ): Promise<URL | undefined> => {
-  const options: GetSignedUrlConfig = {
+  const options = {
     version: 'v4',
     action: 'read',
     expires: Date.now() + 240 * 60 * 1000,

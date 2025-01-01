@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { File, Storage } from '@google-cloud/storage'
-import { RedisDataSource } from '@omnivore/utils'
+import { RedisDataSource, File, Storage } from '@omnivore/utils'
 import * as Sentry from '@sentry/serverless'
 import axios from 'axios'
 import crypto from 'crypto'
@@ -160,7 +159,7 @@ export const textToSpeechHandler = Sentry.GCPFunction.wrapHttpFunction(
       const audioFile = createGCSFile(bucket, audioFileName)
       const audioStream = audioFile.createWriteStream({
         resumable: true,
-      }) as NodeJS.WriteStream
+      })
       // synthesize text to speech
       const startTime = Date.now()
       // temporary solution to use realistic text to speech
@@ -170,6 +169,7 @@ export const textToSpeechHandler = Sentry.GCPFunction.wrapHttpFunction(
         audioStream,
         key: id,
       })
+      audioFile.save(audioStream)
       console.info(
         `Synthesize text to speech completed in ${Date.now() - startTime} ms`
       )

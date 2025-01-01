@@ -1,6 +1,5 @@
-import { Storage } from '@google-cloud/storage'
 import { fetchContent } from '@omnivore/puppeteer-parse'
-import { RedisDataSource } from '@omnivore/utils'
+import { RedisDataSource, Storage } from '@omnivore/utils'
 import axios from 'axios'
 import 'dotenv/config'
 import jwt from 'jsonwebtoken'
@@ -59,9 +58,7 @@ interface FetchResult {
   contentType?: string
 }
 
-const storage = process.env.GCS_UPLOAD_SA_KEY_FILE_PATH
-  ? new Storage({ keyFilename: process.env.GCS_UPLOAD_SA_KEY_FILE_PATH })
-  : new Storage()
+const storage = new Storage()
 const bucketName = process.env.GCS_UPLOAD_BUCKET || 'omnivore-files'
 
 const NO_CACHE_URLS = [
@@ -82,7 +79,7 @@ const uploadToBucket = async (filePath: string, data: string) => {
   await storage
     .bucket(bucketName)
     .file(filePath)
-    .save(data, { public: false, timeout: 5000 })
+    .save(data)
 }
 
 const uploadOriginalContent = async (

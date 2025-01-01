@@ -47,7 +47,6 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NODE_OPTIONS=--max-old-space-size=4096
-ENV PORT=8080
 
 COPY --from=builder /app/packages/api/dist /app/packages/api/dist
 COPY --from=builder /app/packages/readabilityjs/ /app/packages/readabilityjs/
@@ -59,6 +58,15 @@ COPY --from=builder /app/packages/text-to-speech/ /app/packages/text-to-speech/
 COPY --from=builder /app/packages/content-handler/ /app/packages/content-handler/
 COPY --from=builder /app/packages/liqe/ /app/packages/liqe/
 COPY --from=builder /app/packages/utils/ /app/packages/utils/
-EXPOSE 8080
+COPY /packages/api/docker-entrypoint.sh /app/packages/api/docker-entrypoint.sh
 
-CMD ["yarn", "workspace", "@omnivore/api", "start"]
+# Server port
+EXPOSE 4000
+
+# queue-processor port
+EXPOSE 3002
+
+# export-processor port
+EXPOSE 3003
+
+ENTRYPOINT [ "/app/packages/api/docker-entrypoint.sh" ]

@@ -84,7 +84,7 @@ const uploadContent = async (
   }
 
   // append the existing file to the archive
-  archive.append(file.createReadStream(), {
+  archive.append(await file.createReadStream(), {
     name: `content/${libraryItem.slug}.html`,
   })
 }
@@ -107,7 +107,7 @@ const uploadPdfContent = async (
   if (exists) {
     console.log(`adding PDF file: ${filePath}`)
     // append the existing file to the archive
-    archive.append(file.createReadStream(), {
+    archive.append(await file.createReadStream(), {
       name: `content/${libraryItem.slug}.pdf`,
     })
   }
@@ -236,22 +236,6 @@ export const exportJob = async (jobData: ExportJobData) => {
 
     const file = createGCSFile(fullPath)
 
-    // Create a write stream
-    const writeStream = file.createWriteStream({
-      metadata: {
-        contentType: 'application/zip',
-      },
-    })
-
-    // Handle any errors in the streams
-    writeStream.on('error', (err) => {
-      logger.error('Error writing to GCS:', err)
-    })
-
-    writeStream.on('finish', () => {
-      logger.info('File successfully written to GCS')
-    })
-
     // Initialize archiver for zipping files
     const archive = archiver('zip', {
       zlib: { level: 9 }, // Compression level
@@ -261,9 +245,6 @@ export const exportJob = async (jobData: ExportJobData) => {
     archive.on('error', (err) => {
       throw err
     })
-
-    // Pipe the archiver output to the write stream
-    archive.pipe(writeStream)
 
     let cursor = 0
     try {
@@ -302,13 +283,12 @@ export const exportJob = async (jobData: ExportJobData) => {
     } finally {
       // Finalize the archive
       await archive.finalize()
-    }
 
-    // Ensure that the writeStream has finished
-    await new Promise((resolve, reject) => {
-      writeStream.on('finish', resolve)
-      writeStream.on('error', reject)
-    })
+      // Pipe the archiver output to the write stream
+      await file.save(archive, {
+        contentType: 'application/zip'
+      })
+    }
 
     logger.info(`export completed, exported ${cursor} items`, {
       userId,

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { File, GetSignedUrlConfig, Storage } from '@google-cloud/storage'
 import axios from 'axios'
 import { ContentReaderType } from '../entity/library_item'
 import { env } from '../env'
 import { PageType } from '../generated/graphql'
 import { ContentFormat } from '../jobs/upload_content'
 import { logger } from './logger'
+import { Storage, File } from '@omnivore/utils'
 
 export const contentReaderForLibraryItem = (
   itemType: string,
@@ -31,9 +31,7 @@ export const contentReaderForLibraryItem = (
  * the default app engine service account on the IAM page. We also need to
  * enable IAM related APIs on the project.
  */
-export const storage = env.fileUpload?.gcsUploadSAKeyFilePath
-  ? new Storage({ keyFilename: env.fileUpload.gcsUploadSAKeyFilePath })
-  : new Storage()
+export const storage = new Storage()
 const bucketName = env.fileUpload.gcsUploadBucket
 const maxContentLength = 10 * 1024 * 1024 // 10MB
 
@@ -48,7 +46,7 @@ export const generateUploadSignedUrl = async (
   selectedBucket?: string
 ): Promise<string> => {
   // These options will allow temporary uploading of file with requested content type
-  const options: GetSignedUrlConfig = {
+  const options = {
     version: 'v4',
     action: 'write',
     expires: Date.now() + 15 * 60 * 1000, // 15 minutes
@@ -71,7 +69,7 @@ export const generateDownloadSignedUrl = async (
     expires?: number
   }
 ): Promise<string> => {
-  const options: GetSignedUrlConfig = {
+  const options = {
     version: 'v4',
     action: 'read',
     expires: config?.expires ?? Date.now() + 240 * 60 * 1000, // four hours
@@ -94,7 +92,7 @@ export const getStorageFileDetails = async (
   // GCS returns MD5 Hash in base64 encoding, we convert it here to hex string
   const md5Hash = Buffer.from(metadata.md5Hash || '', 'base64').toString('hex')
 
-  return { md5Hash, fileUrl: file.publicUrl() }
+  return { md5Hash, fileUrl: await file.publicUrl() }
 }
 
 export const generateUploadFilePathName = (

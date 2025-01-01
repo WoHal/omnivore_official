@@ -171,6 +171,7 @@ export const createWorker = (connection: ConnectionOptions) =>
           //   return await refreshFeed(job.data)
           // }
           case 'save-page': {
+            logger.info('start to save-page')
             return savePageJob(job.data, job.attemptsMade)
           }
           // case 'update-pdf-content': {

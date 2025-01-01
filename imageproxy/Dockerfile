@@ -1,4 +1,4 @@
-FROM willnorris/imageproxy:v0.10.0 as build
+FROM ghcr.io/willnorris/imageproxy:main as build
 
 # Above imageproxy image is built from scratch image and is barebones
 # Switching over to ubuntu base image to allow us to debug better.
@@ -10,7 +10,7 @@ RUN apt update && apt install -y ca-certificates
 
 COPY --from=build /app/imageproxy .
 
-COPY start_imageproxy.sh .
+COPY /imageproxy/start_imageproxy.sh .
 
 # Using a custom script to customize imageproxy startup and to pass
 # signatureKey through env variable

@@ -35,6 +35,13 @@ services:
     image: "ankane/pgvector:v0.5.1"
     container_name: "omnivore-postgres"
     restart: unless-stopped
+    user: postgres
+    healthcheck:
+      test: "exit 0"
+      interval: 2s
+      timeout: 12s
+      retries: 3
+
     environment:
       << : *pg_conf
     ports:
@@ -54,7 +61,8 @@ services:
       << : *pg_conf
       PGPASSWORD: *POSTGRES_PASSWORD # psql need this
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   redis:
     image: redis:alpine3.20

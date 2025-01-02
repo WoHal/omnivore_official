@@ -1,9 +1,10 @@
 x-domain_conf:
-  WEB_URL: &WEB_URL omnivore.example.fun
-  API_URL: &API_URL api.omnivore.example.fun
+  WEB_URL: &WEB_URL http://omnivore.example.fun
+  API_URL: &API_URL http://api.omnivore.example.fun
+  CONTENT_FETCH_URL: &CONTENT_FETCH_URL http://omnivore-content-fetch:3002/?token=CONTENT_FETCH_TOKEN
 
 x-auth_conf: &auth_conf
-  VERIFICATION_TOKEN: &VERIFICATION_TOKEN VERIFICATION_TOKEN
+  VERIFICATION_TOKEN: &VERIFICATION_TOKEN CONTENT_FETCH_TOKEN
   SSO_JWT_SECRET: &SSO_JWT_SECRET SSO_JWT_SECRET
   JWT_SECRET: &JWT_SECRET JWT_SECRET
 
@@ -140,9 +141,9 @@ services:
       JAEGER_HOST: omnivore-jaeger
       JWT_SECRET: *JWT_SECRET
       SSO_JWT_SECRET: *SSO_JWT_SECRET
-      CLIENT_URL: http://*WEB_URL
+      CLIENT_URL: *WEB_URL
       GATEWAY_URL: http://omnivore-api:4000/api
-      CONTENT_FETCH_URL: http://omnivore-content-fetch:3002/?token=*VERIFICATION_TOKEN
+      CONTENT_FETCH_URL: *CONTENT_FETCH_URL
       GCS_UPLOAD_BUCKET: omnivore-bucket
       PUBSUB_EMULATOR_HOST: http://omnivore-pubsub:8085
     depends_on:
@@ -169,18 +170,18 @@ services:
       context: .
       dockerfile: ./packages/web/Dockerfile
       args:
-        - APP_ENV=prod
-        - BASE_URL=http://*WEB_URL # e.g. http://omnivore.domain.com
-        - SERVER_BASE_URL=http://*API_URL # e.g. http://api.omnivore.domain.com
-        - HIGHLIGHTS_BASE_URL=http://*WEB_URL # e.g. http://omnivore.domain.com
+        APP_ENV: prod
+        BASE_URL: *WEB_URL # e.g. http://omnivore.domain.com
+        SERVER_BASE_URL: *API_URL # e.g. http://api.omnivore.domain.com
+        HIGHLIGHTS_BASE_URL: *WEB_URL # e.g. http://omnivore.domain.com
     container_name: "omnivore-web"
     ports:
       - 3001:8080
     environment:
-      - NEXT_PUBLIC_APP_ENV=prod
-      - NEXT_PUBLIC_BASE_URL=http://*WEB_URL # e.g. http://omnivore.domain.com
-      - NEXT_PUBLIC_SERVER_BASE_URL=http://*API_URL # e.g. http://api.omnivore.domain.com
-      - NEXT_PUBLIC_HIGHLIGHTS_BASE_URL=http://*WEB_URL # e.g. http://omnivore.domain.com
+      NEXT_PUBLIC_APP_ENV: prod
+      NEXT_PUBLIC_BASE_URL: *WEB_URL # e.g. http://omnivore.domain.com
+      NEXT_PUBLIC_SERVER_BASE_URL: *API_URL # e.g. http://api.omnivore.domain.com
+      NEXT_PUBLIC_HIGHLIGHTS_BASE_URL: *WEB_URL # e.g. http://omnivore.domain.com
     depends_on:
       api:
         condition: service_healthy

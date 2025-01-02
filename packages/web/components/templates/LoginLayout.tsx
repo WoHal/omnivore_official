@@ -15,7 +15,7 @@ import { ShutdownBanner } from '../elements/ShutdownBanner'
 export function LoginLayout(props: LoginFormProps): JSX.Element {
   return (
     <>
-      <ShutdownBanner />
+      {/* <ShutdownBanner /> */}
       <MediumBreakpointBox
         smallerLayoutNode={<MobileLoginLayout {...props} />}
         largerLayoutNode={<MediumLoginLayout {...props} />}

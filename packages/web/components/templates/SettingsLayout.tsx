@@ -83,7 +83,7 @@ export function SettingsLayout(props: SettingsLayoutProps): JSX.Element {
       css={{ width: '100%', height: '100%', minHeight: '100vh' }}
     >
       <PageMetaData path="settings" title="Settings" />
-      <ShutdownBanner />
+      {/* <ShutdownBanner /> */}
       <VStack css={{ width: '100%', height: '100%' }}>
         <Box
           css={{

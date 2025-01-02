@@ -207,7 +207,7 @@ const Header = (props: HeaderProps): JSX.Element => {
         height: '58px',
       }}
     >
-      <ShutdownBanner />
+      {/* <ShutdownBanner /> */}
       <Button
         style="plainIcon"
         onClick={(event) => {

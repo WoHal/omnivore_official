@@ -1,6 +1,7 @@
 #!/bin/bash
 
 psql --host $PG_HOST --username $POSTGRES_USER --command "CREATE DATABASE $PG_DB;" || true
+echo "created $PG_DB database"
 
 psql --host $PG_HOST --username $POSTGRES_USER --command "CREATE USER app_user WITH ENCRYPTED PASSWORD '$PG_PASSWORD';" || true
 echo "created app_user"
@@ -11,7 +12,7 @@ echo "created replicator"
 psql --host $PG_HOST --username $POSTGRES_USER --command "SELECT pg_create_physical_replication_slot('replication_slot');" || true
 echo "created replication_slot"
 
-yarn workspace @omnivore/db migrate
+PG_USER=$POSTGRES_USER PG_PASSWORD=$PGPASSWORD yarn workspace @omnivore/db migrate
 
 psql --host $PG_HOST --username $POSTGRES_USER --dbname $PG_DB --command "GRANT omnivore_user TO app_user;" || true
 echo "granted omnivore_user to app_user"
